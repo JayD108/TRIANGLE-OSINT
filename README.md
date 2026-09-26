@@ -8,9 +8,6 @@
 
 TRIANGLE is an advanced Global Open-Source Intelligence (OSINT) platform. It provides a multi-spectral visualization of strategic chokepoints, geopolitical dynamics, and defense telemetry through a highly immersive, cyber-themed interface.
 
-<img width="1280" height="800" alt="Screenshot 2026-09-26 201158" src="https://github.com/user-attachments/assets/1877881c-499e-466b-b34a-42ea829d27da" />
-
-
 
 ## Core Features
 
@@ -31,6 +28,9 @@ The platform's analytical engine consists of 9 domain specialists, 1 Adversarial
 - **Regional Conflicts Agent**: Surveys flashpoints across the Indo-Pacific, South Asia, Persian Gulf, Eastern Europe, and the Red Sea.
 - **Global Markets & Macro Agent**: Assesses macroeconomic stability, sovereign bond yields, and currency fluctuations.
 - **Energy, Commodities & Trade Agent**: Monitors crude oil flows, LNG tankers, rare earths supply chains, and critical infrastructure.
+
+<img width="1280" height="800" alt="Screenshot 2026-09-26 201158" src="https://github.com/user-attachments/assets/1877881c-499e-466b-b34a-42ea829d27da" />
+
 
 ## Run Locally
 
