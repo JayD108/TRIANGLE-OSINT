@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRIANGLE // Dark Cinematic Sci-Fi HUD Animation</title>
+  <!-- Google Fonts: Orbitron & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <style>
+    /* Reset & Viewport Constraints */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #05080e;
+      font-family: 'Orbitron', 'JetBrains Mono', monospace;
+      color: #e0e0e0;
+    }
+
+    /* Ambient Background Radial Glow */
+    .viewport-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.08) 0%, rgba(0, 255, 127, 0.03) 40%, #05080e 75%);
+      z-index: 0;
+    }
+
+    /* Scanlines Overlay */
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 4px;
+      opacity: 0.35;
+      z-index: 2;
+    }
+
+    /* 3D Particle Canvas */
+    #particleCanvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Central HUD Container - Perfectly Centered */
+    .hud-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      perspective: 1000px;
+    }
+
+    .hud-svg {
+      width: 90vw;
+      max-width: 680px;
+      height: 90vh;
+      max-height: 600px;
+      filter: drop-shadow(0 0 16px rgba(0, 255, 255, 0.4)) drop-shadow(0 0 28px rgba(0, 255, 127, 0.25));
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+
+    /* Text Styling */
+    .hud-text {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 38px;
+      letter-spacing: 0.25em;
+      fill: #ffffff;
+      text-anchor: middle;
+      filter: drop-shadow(0 0 10px #00ff7f);
+    }
+
+    .hud-text-glow {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 38px;
+      letter-spacing: 0.25em;
+      fill: #00ffff;
+      text-anchor: middle;
+      opacity: 0.85;
+      filter: blur(4px) drop-shadow(0 0 15px #00ffff);
+    }
+
+    /* UI Controls Bar at Bottom */
+    .controls-bar {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 90%;
+      max-width: 600px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    .phase-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(12, 21, 38, 0.85);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      color: #00ffff;
+      letter-spacing: 0.1em;
+      backdrop-filter: blur(10px);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ff7f;
+      box-shadow: 0 0 8px #00ff7f;
+      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    .timeline-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .timeline-progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00ffff, #00ff7f);
+      box-shadow: 0 0 10px #00ff7f;
+    }
+
+    /* Interactive Buttons */
+    .btn-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-btn {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      color: #94a3b8;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+
+    .hud-btn:hover {
+      border-color: #00ffff;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+
+    .hud-btn.active {
+      background: rgba(0, 255, 127, 0.2);
+      border-color: #00ff7f;
+      color: #00ff7f;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glowing Background -->
+  <div class="viewport-bg"></div>
+
+  <!-- Scanlines Effect -->
+  <div class="scanlines"></div>
+
+  <!-- Background 3D Particle Canvas -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- Central Centered HUD Stage -->
+  <div class="hud-stage" id="hudStage">
+    <svg class="hud-svg" viewBox="0 0 800 760">
+      <defs>
+        <!-- Cyan -> Green Neon Gradient -->
+        <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#00ffff" />
+          <stop offset="50%" stop-color="#00f5b8" />
+          <stop offset="100%" stop-color="#00ff7f" />
+        </linearGradient>
+
+        <linearGradient id="neonGradInvert" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#00ff7f" />
+          <stop offset="100%" stop-color="#00ffff" />
+        </linearGradient>
+
+        <!-- Glow Filter -->
+        <filter id="svgGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur1" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur2" />
+          <feMerge>
+            <feMergeNode in="blur2" />
+            <feMergeNode in="blur1" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Center Singularity Flash -->
+      <circle id="coreDot" cx="400" cy="380" r="16" fill="url(#neonGrad)" opacity="0" filter="url(#svgGlow)" />
+
+      <!-- Main Animated Triangle Group -->
+      <g id="mainTriangleGroup" style="transform-origin: 400px 380px;">
+        
+        <!-- Outer Segmented Triangle -->
+        <!-- Left Leg -->
+        <path id="segLeft" d="M 395 160 L 205 500" stroke="url(#neonGrad)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#svgGlow)" />
+        
+        <!-- Right Leg with notch gap -->
+        <path id="segRight" d="M 405 160 L 515 355 M 527 376 L 595 500" stroke="url(#neonGrad)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#svgGlow)" />
+        
+        <!-- Base with center cutout -->
+        <path id="segBase" d="M 215 500 L 350 500 M 450 500 L 585 500" stroke="url(#neonGrad)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#svgGlow)" />
+
+        <!-- Inner Concentric Triangle -->
+        <polygon id="innerTri" points="400,205 565,480 235,480" stroke="url(#neonGradInvert)" stroke-width="1.8" stroke-dasharray="14 6 45 6 100 8" fill="none" opacity="0.75" filter="url(#svgGlow)" />
+
+        <!-- Horizontal Scanning Accent Line -->
+        <line id="accentLine" x1="220" y1="420" x2="580" y2="420" stroke="#00ffff" stroke-width="1.8" stroke-dasharray="6 4 120 6 80 4" opacity="0.8" />
+
+        <!-- Tech Notches & Dots -->
+        <g id="notchesGroup">
+          <polyline points="515,355 522,355 522,376 527,376" stroke="#00ff7f" stroke-width="2.5" fill="none" />
+          <polyline points="350,500 355,508 445,508 450,500" stroke="#00ffff" stroke-width="2" fill="none" />
+          <circle cx="215" cy="500" r="2.5" fill="#00ff7f" />
+          <circle cx="585" cy="500" r="2.5" fill="#00ffff" />
+        </g>
+
+        <!-- Satellites -->
+        <polygon id="satTop" points="400,105 412,125 388,125" fill="url(#neonGrad)" stroke="#00ffff" stroke-width="1" filter="url(#svgGlow)" />
+        <polygon id="satLeft" points="160,515 172,535 148,535" fill="url(#neonGrad)" stroke="#00ffff" stroke-width="1" filter="url(#svgGlow)" />
+        <polygon id="satRight" points="640,515 652,535 628,535" fill="url(#neonGrad)" stroke="#00ff7f" stroke-width="1" filter="url(#svgGlow)" />
+
+        <!-- Three Inner Micro-Triangles (0:07 video frame) -->
+        <g id="innerMicroGroup" opacity="0" style="transform-origin: 400px 380px;">
+          <polygon points="400,325 412,305 388,305" fill="#00ffff" opacity="0.8" />
+          <polygon points="340,445 350,460 330,460" fill="#00ff7f" opacity="0.8" />
+          <polygon points="460,445 470,460 450,460" fill="#00ffff" opacity="0.8" />
+        </g>
+
+        <!-- Targeting Brackets [ ] -->
+        <g id="bracketsGroup" style="transform-origin: 400px 380px;">
+          <path id="brackLeft" d="M 285 360 L 270 360 L 270 400 L 285 400" stroke="#00ffff" stroke-width="2.5" fill="none" stroke-linecap="square" filter="url(#svgGlow)" />
+          <path id="brackRight" d="M 515 360 L 530 360 L 530 400 L 515 400" stroke="#00ff7f" stroke-width="2.5" fill="none" stroke-linecap="square" filter="url(#svgGlow)" />
+        </g>
+
+        <!-- Text Elements -->
+        <text id="textGlow" class="hud-text-glow" x="400" y="388">TRIANGLE</text>
+        <text id="textMain" class="hud-text" x="400" y="388">TRIANGLE</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Bottom Interactive HUD Timeline Bar -->
+  <div class="controls-bar">
+    <div class="phase-badge">
+      <div class="pulse-dot"></div>
+      <span id="phaseLabel">0:00 - INTRO: ASSEMBLE FROM CENTER</span>
+      <span style="color: #94a3b8;">//</span>
+      <span id="timeCounter" style="color: #00ff7f;">00:00.0</span>
+    </div>
+
+    <div class="timeline-track">
+      <div id="timelineProgress" class="timeline-progress"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="hud-btn active" id="playBtn" onclick="togglePlay()">PAUSE</button>
+      <button class="hud-btn" onclick="seek(0)">0:00 INTRO</button>
+      <button class="hud-btn" onclick="seek(1.0)">0:01 REVEAL</button>
+      <button class="hud-btn" onclick="seek(2.0)">0:02 LIVING HUD</button>
+      <button class="hud-btn" onclick="seek(6.2)">0:06 GLITCH</button>
+      <button class="hud-btn" onclick="seek(7.8)">0:08 COLLAPSE</button>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // 1. 3D FLOATING PARTICLES CANVAS SYSTEM
+    // Tiny triangles, crosshairs, sparkles floating upwards in 3D
+    // -------------------------------------------------------------
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const colors = ['#00ffff', '#00ff7f', '#38bdf8'];
+    const types = ['triangle', 'triangle', 'crosshair', 'sparkle'];
+
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: (Math.random() - 0.5) * width * 1.5,
+        y: (Math.random() - 0.5) * height * 1.5,
+        z: Math.random() * 800 + 100,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: -0.4 - Math.random() * 0.4,
+        vz: (Math.random() - 0.5) * 0.2,
+        rx: Math.random() * Math.PI * 2,
+        ry: Math.random() * Math.PI * 2,
+        rz: Math.random() * Math.PI * 2,
+        drx: (Math.random() - 0.5) * 0.02,
+        dry: (Math.random() - 0.5) * 0.02,
+        drz: (Math.random() - 0.5) * 0.02,
+        size: Math.random() * 7 + 4,
+        type: types[Math.floor(Math.random() * types.length)],
+        opacity: Math.random() * 0.4 + 0.15,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        hollow: Math.random() > 0.4
+      });
+    }
+
+    function renderParticles() {
+      ctx.clearRect(0, 0, width, height);
+      const cx = width / 2;
+      const cy = height / 2;
+      const FOV = 400;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.z += p.vz;
+        p.rx += p.drx;
+        p.ry += p.dry;
+        p.rz += p.drz;
+
+        if (p.y < -height * 0.7) {
+          p.y = height * 0.7;
+          p.x = (Math.random() - 0.5) * width * 1.5;
+          p.z = Math.random() * 800 + 100;
+        }
+
+        const scale = FOV / (FOV + p.z);
+        const projX = cx + p.x * scale;
+        const projY = cy + p.y * scale;
+
+        if (projX < -50 || projX > width + 50 || projY < -50 || projY > height + 50) continue;
+
+        ctx.save();
+        ctx.translate(projX, projY);
+        ctx.rotate(p.rz);
+        ctx.globalAlpha = Math.min(1, p.opacity * scale * 1.3);
+        ctx.strokeStyle = p.color;
+        ctx.fillStyle = p.color;
+        ctx.lineWidth = 1;
+
+        const s = p.size * scale;
+        if (p.type === 'triangle') {
+          ctx.beginPath();
+          ctx.moveTo(0, -s);
+          ctx.lineTo(s * 0.8, s * 0.7);
+          ctx.lineTo(-s * 0.8, s * 0.7);
+          ctx.closePath();
+          p.hollow ? ctx.stroke() : ctx.fill();
+        } else if (p.type === 'crosshair') {
+          ctx.beginPath();
+          ctx.moveTo(-s, 0); ctx.lineTo(s, 0);
+          ctx.moveTo(0, -s); ctx.lineTo(0, s);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, Math.max(1, s * 0.4), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      requestAnimationFrame(renderParticles);
+    }
+    renderParticles();
+
+    // -------------------------------------------------------------
+    // 2. TEXT SCRAMBLE CONTROLLER
+    // Scrambles letters like "R  ANGL", then resolves to "TRIANGLE"
+    // -------------------------------------------------------------
+    const textMain = document.getElementById('textMain');
+    const textGlow = document.getElementById('textGlow');
+    const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_#';
+
+    function updateScrambled(progress) {
+      if (progress < 0.1) {
+        textMain.textContent = '';
+        textGlow.textContent = '';
+      } else if (progress < 0.18) {
+        if (progress < 0.14) {
+          textMain.textContent = 'R  ANGL';
+          textGlow.textContent = 'R  ANGL';
+        } else {
+          let s = '';
+          const target = 'TRIANGLE';
+          for (let i = 0; i < target.length; i++) {
+            s += (Math.random() > 0.4) ? target[i] : glyphs[Math.floor(Math.random() * glyphs.length)];
+          }
+          textMain.textContent = s;
+          textGlow.textContent = s;
+        }
+      } else if (progress < 0.62) {
+        textMain.textContent = 'TRIANGLE';
+        textGlow.textContent = 'TRIANGLE';
+      } else if (progress < 0.76) {
+        const ratio = (progress - 0.62) / 0.14;
+        let s = '';
+        const target = 'TRIANGLE';
+        for (let i = 0; i < target.length; i++) {
+          s += (Math.random() > ratio) ? target[i] : (Math.random() > 0.5 ? glyphs[Math.floor(Math.random() * glyphs.length)] : ' ');
+        }
+        textMain.textContent = s;
+        textGlow.textContent = s;
+      } else {
+        textMain.textContent = '';
+        textGlow.textContent = '';
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 3. GSAP 10-SECOND MASTER TIMELINE
+    // -------------------------------------------------------------
+    const mainGroup = document.getElementById('mainTriangleGroup');
+    const segLeft = document.getElementById('segLeft');
+    const segRight = document.getElementById('segRight');
+    const segBase = document.getElementById('segBase');
+    const innerTri = document.getElementById('innerTri');
+    const accentLine = document.getElementById('accentLine');
+    const satTop = document.getElementById('satTop');
+    const satLeft = document.getElementById('satLeft');
+    const satRight = document.getElementById('satRight');
+    const innerMicroGroup = document.getElementById('innerMicroGroup');
+    const brackLeft = document.getElementById('brackLeft');
+    const brackRight = document.getElementById('brackRight');
+    const coreDot = document.getElementById('coreDot');
+    const phaseLabel = document.getElementById('phaseLabel');
+    const timeCounter = document.getElementById('timeCounter');
+    const progressBar = document.getElementById('timelineProgress');
+
+    const tl = gsap.timeline({
+      repeat: -1,
+      defaults: { ease: 'power2.inOut' },
+      onUpdate: () => {
+        const time = tl.time();
+        timeCounter.textContent = '00:' + time.toFixed(1).padStart(4, '0');
+        progressBar.style.width = (time / 10 * 100) + '%';
+        updateScrambled(time / 10);
+
+        if (time < 1.0) phaseLabel.textContent = '0:00 - INTRO: ASSEMBLE FROM CENTER';
+        else if (time < 2.0) phaseLabel.textContent = '0:01 - TEXT REVEAL & CRYPTOGRAPHIC SCRAMBLE';
+        else if (time < 6.0) phaseLabel.textContent = '0:02 - LIVING HUD & 3D PARTICLE DRIFT';
+        else if (time < 7.5) phaseLabel.textContent = '0:06 - DIGITAL GLITCH & TEXT DISPERSION';
+        else if (time < 9.0) phaseLabel.textContent = '0:07 - IMPLOSION & SINGULARITY COLLAPSE';
+        else phaseLabel.textContent = '0:09 - REBOOTING MATRIX';
+      }
+    });
+
+    // Initial state
+    tl.set(mainGroup, { opacity: 0, scale: 0.1 });
+    tl.set([satTop, satLeft, satRight], { opacity: 0, scale: 0 });
+    tl.set(coreDot, { opacity: 0, scale: 0, transformOrigin: '400px 380px' });
+    tl.set([brackLeft, brackRight], { opacity: 0, x: (i) => i === 0 ? 30 : -30 });
+    tl.set(accentLine, { scaleX: 0, transformOrigin: '400px 420px', opacity: 0 });
+    tl.set(innerTri, { opacity: 0, scale: 0.8, transformOrigin: '400px 380px' });
+
+    // 0:00 - 0:01: Intro Assemble
+    tl.to(coreDot, { opacity: 1, scale: 1.8, duration: 0.35, ease: 'power3.out' }, 0.05);
+    tl.to(coreDot, { opacity: 0.3, scale: 0.8, duration: 0.45 }, 0.4);
+    tl.to(mainGroup, { opacity: 1, scale: 1, duration: 0.95, ease: 'power3.out' }, 0.1);
+    tl.fromTo([segLeft, segRight, segBase], 
+      { strokeDasharray: 500, strokeDashoffset: 500, opacity: 0.4 }, 
+      { strokeDashoffset: 0, opacity: 1, duration: 0.9, stagger: 0.1, ease: 'power3.out' }, 0.15
+    );
+    tl.to([satTop, satLeft, satRight], { opacity: 1, scale: 1, duration: 0.8, stagger: 0.08, ease: 'back.out(1.8)' }, 0.3);
+    tl.to(accentLine, { opacity: 0.9, scaleX: 1, duration: 0.7, ease: 'power2.out' }, 0.4);
+    tl.to(innerTri, { opacity: 0.8, scale: 1, duration: 0.6 }, 0.5);
+
+    // 0:01 - 0:02: Text Reveal & Brackets
+    tl.to([brackLeft, brackRight], { opacity: 1, x: 0, duration: 0.45, ease: 'power3.out' }, 1.05);
+    tl.fromTo(textGlow, { opacity: 0.2 }, { opacity: 1, duration: 0.35, yoyo: true, repeat: 1 }, 1.75);
+
+    // 0:02 - 0:06: Idle / Living HUD
+    tl.to(mainGroup, { scale: 1.025, duration: 2.0, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 2.0);
+    tl.to(satTop, { y: -6, duration: 1.9, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 2.1);
+    tl.to(innerMicroGroup, { opacity: 0.95, duration: 0.7 }, 4.2);
+
+    // 0:06 - 0:09: Outro Glitch & Collapse
+    tl.to([textMain, textGlow], { x: 3, duration: 0.08, repeat: 7, yoyo: true }, 6.3);
+    tl.to([textMain, textGlow], { opacity: 0, duration: 0.3 }, 7.3);
+    tl.to(brackLeft, { x: 25, opacity: 0, duration: 0.5 }, 7.1);
+    tl.to(brackRight, { x: -25, opacity: 0, duration: 0.5 }, 7.1);
+    tl.to(innerMicroGroup, { opacity: 0, scale: 0.2, duration: 0.6 }, 7.4);
+    tl.to([satTop, satLeft, satRight], { scale: 0, opacity: 0, duration: 0.7, ease: 'power3.in' }, 7.8);
+    tl.to(mainGroup, { scale: 0.05, opacity: 0, duration: 0.9, ease: 'power3.in' }, 8.0);
+    tl.fromTo(coreDot, { opacity: 0, scale: 0.5 }, { opacity: 0.9, scale: 1.5, duration: 0.25 }, 8.6);
+    tl.to(coreDot, { opacity: 0, scale: 0, duration: 0.35 }, 8.85);
+
+    // Controls
+    let isPlaying = true;
+    function togglePlay() {
+      const btn = document.getElementById('playBtn');
+      if (isPlaying) {
+        tl.pause();
+        btn.textContent = 'PLAY';
+        btn.classList.remove('active');
+      } else {
+        tl.play();
+        btn.textContent = 'PAUSE';
+        btn.classList.add('active');
+      }
+      isPlaying = !isPlaying;
+    }
+
+    function seek(sec) {
+      tl.seek(sec);
+    }
+
+    // 3D Mouse Parallax
+    window.addEventListener('mousemove', (e) => {
+      const xRel = (e.clientX / window.innerWidth - 0.5) * 2;
+      const yRel = (e.clientY / window.innerHeight - 0.5) * 2;
+      gsap.to(mainGroup, {
+        rotationY: xRel * 10,
+        rotationX: -yRel * 10,
+        duration: 0.8,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    });
+  </script>
+</body>
+</html>
