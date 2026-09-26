@@ -1,9 +1,13 @@
 # TRIANGLE INTELLIGENCE // GLOBAL OSINT MATRIX
 
 > **Don't just observe what happened. Understand why it matters, what changed, what is connected, and what developments could occur next.** 
-> Powered by a synchronized 11-agent Intelligence Council with India at the center of global strategic awareness.
+> Powered by a synchronized 11-agent Intelligence Council with a focus on global strategic awareness.
 
-TRIANGLE is an advanced, India-first Global Open-Source Intelligence (OSINT) platform. It provides a multi-spectral visualization of strategic chokepoints, geopolitical dynamics, and defense telemetry through a highly immersive, cyber-themed interface.
+![Global OSINT Matrix](./public/screenshot-hud.png)
+
+TRIANGLE is an advanced Global Open-Source Intelligence (OSINT) platform. It provides a multi-spectral visualization of strategic chokepoints, geopolitical dynamics, and defense telemetry through a highly immersive, cyber-themed interface.
+
+![Intelligence Council Console](./public/screenshot-council.png)
 
 ## Core Features
 
