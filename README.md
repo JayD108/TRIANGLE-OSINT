@@ -8,7 +8,8 @@
 
 TRIANGLE is an advanced Global Open-Source Intelligence (OSINT) platform. It provides a multi-spectral visualization of strategic chokepoints, geopolitical dynamics, and defense telemetry through a highly immersive, cyber-themed interface.
 
-![Uploading Screenshot 2026-09-26 201158.png…]()
+<img width="1280" height="800" alt="Screenshot 2026-09-26 201158" src="https://github.com/user-attachments/assets/1877881c-499e-466b-b34a-42ea829d27da" />
+
 
 
 ## Core Features
