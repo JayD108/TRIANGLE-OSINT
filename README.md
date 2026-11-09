@@ -1,49 +1,67 @@
-# TRIANGLE INTELLIGENCE // GLOBAL OSINT MATRIX
+# TRIANGLE Intelligence // Global OSINT Matrix
 
-> **Don't just observe what happened. Understand why it matters, what changed, what is connected, and what developments could occur next.** 
-> Powered by a synchronized 11-agent Intelligence Council with a focus on global strategic awareness.
+A front-end concept for a global open-source-intelligence (OSINT) dashboard: a 3D orbital globe, a "council" of analytical agents, and a cyber-themed command interface.
+
+> **Important:** this project is currently a **UI demo that runs on simulated data**. All intelligence content comes from `src/data/mockIntelligence.ts`; there is no backend, no live feeds and no AI model behind the "agents" yet.
 
 <img width="1279" height="799" alt="Screenshot 2026-09-26 201142" src="https://github.com/user-attachments/assets/e9df6526-f54b-42c1-946b-0eede1cee646" />
 
+## Features
 
-TRIANGLE is an advanced Global Open-Source Intelligence (OSINT) platform. It provides a multi-spectral visualization of strategic chokepoints, geopolitical dynamics, and defense telemetry through a highly immersive, cyber-themed interface.
-
-
-## Core Features
-
-- **Global OSINT Geo-Vectors**: An orbital HUD displaying multi-spectral visualization of strategic chokepoints, naval choke corridors, and deterrence lines. Provides real-time satellite telemetry, bandwidth throughput, and target lock coordinates.
-- **The Intelligence Council Console**: A synchronized matrix of 11 analytical agents that process complex geopolitical, financial, and defense inquiries to produce structured OSINT intelligence.
-- **Interactive Command Prompt**: Submit OSINT inquiries directly to the council and watch the specialized agents synthesize responses in real-time.
-- **Immersive Cyber UI**: Features scanlines, encrypted text reveal animations, terminal-style readouts, and sound effects to simulate a high-tech tactical operations center.
-
-## The 11-Agent Council Architecture
-
-The platform's analytical engine consists of 9 domain specialists, 1 Adversarial Verification Agent, and 1 Council Supervisor. Some of the active nodes include:
-
-- **Defense Operations Agent**: Monitors real-time military deployments, exercises, naval sorties, air patrol vectors, and border troop movements.
-- **Weapons & Military Tech Agent**: Analyzes technical telemetry, missile flight ranges, radar signatures, drone EW suites, and counter-measure systems.
-- **Procurement & Industry Agent**: Tracks defense tenders, indigenous Make-in-India contracts, offset obligations, and global arms transfers.
-- **Geopolitical Affairs Agent**: Monitors diplomatic cables, bilateral treaties, UN voting dynamics, bilateral summits, and ministerial communiqués.
-- **Global Powers & Alliances Agent**: Tracks strategic rivalries, Quad operational developments, BRICS enlargement impacts, and great-power deterrence.
-- **Regional Conflicts Agent**: Surveys flashpoints across the Indo-Pacific, South Asia, Persian Gulf, Eastern Europe, and the Red Sea.
-- **Global Markets & Macro Agent**: Assesses macroeconomic stability, sovereign bond yields, and currency fluctuations.
-- **Energy, Commodities & Trade Agent**: Monitors crude oil flows, LNG tankers, rare earths supply chains, and critical infrastructure.
+- **Interactive 3D globe** (React Three Fiber) showing strategic points of interest
+- **Intelligence Council console:** the interface for 11 analyst roles (9 domain specialists, an adversarial verifier and a supervisor) - defence operations, weapons and military tech, procurement and industry, geopolitical affairs, global powers and alliances, regional conflicts, markets and macro, energy and commodities
+- **Country dossiers, intelligence reports and a knowledge-base view**
+- **Verification drawer** for reviewing a report's sources
+- **Immersive cyber UI:** scanlines, encrypted-text reveal animations, HUD overlays, loading animation and sound effects
 
 <img width="1280" height="800" alt="Screenshot 2026-09-26 201158" src="https://github.com/user-attachments/assets/1877881c-499e-466b-b34a-42ea829d27da" />
 
+## Tech stack
 
-## Run Locally
+React 19, TypeScript, Vite, Tailwind CSS, Three.js with React Three Fiber / drei, GSAP, Motion.
 
-This is a standalone frontend application. 
+## Getting started
 
-**Prerequisites:** Node.js
+Prerequisite: Node.js.
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Run the development server:
-   ```bash
-   npm run dev
-   ```
-3. Open your browser to `http://localhost:3000` to access the OSINT terminal.
+```bash
+npm install
+npm run dev        # http://localhost:3000
+npm run build      # production build to dist/
+npm run lint       # TypeScript type-check
+```
+
+`npm install` and `npm run build` were verified for this README. No environment variables are required.
+
+## Project structure
+
+```
+src/
+  App.tsx, main.tsx
+  components/   globe, council monitor, dossiers, reports, knowledge base, HUD
+  data/         mockIntelligence.ts  (all demo content)
+  lib/          sound effects, utilities
+  types/        osint.ts
+components/     shared UI components (globe, encrypted text, holographic card)
+public/         static assets
+```
+
+## How it works
+
+The app is a single-page React application. `App.tsx` composes the sections; each section reads the mock dataset and renders it with animations and a Three.js globe. Nothing is sent to a server.
+
+## Roadmap / known limitations
+
+- Replace the mock dataset with real data sources and a real agent backend.
+- `express` and `tsx` are listed as dependencies but are not used by the current code.
+- Two lockfiles (`package-lock.json` and `bun.lock`) are committed; pick one package manager.
+- UI components exist in both `components/` and `src/components/`.
+- The production bundle triggers a Vite warning for chunks over 500 kB.
+
+## Author
+
+Mrittunjay Dubey, GitHub [@JayD108](https://github.com/JayD108)
+
+## License
+
+No license file is included yet, so all rights are reserved by default.
